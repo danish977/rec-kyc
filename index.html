@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stockist KYC 2026 — Recon Oil Industries</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --surface: #ffffff;
+      --surface2: #fafafa;
+      --red: #c8102e;
+      --red-dim: rgba(200, 16, 46, 0.08);
+      --red-border: rgba(200, 16, 46, 0.2);
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --border: #e0e0e0;
+      --error: #c8102e;
+      --accent: #c8102e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      padding: 32px 16px 80px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 900px;
+      height: 500px;
+      background: radial-gradient(ellipse, rgba(200, 16, 46, 0.04) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--red);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 17px;
+      color: #fff;
+    }
+
+    .brand-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: #1a1a1a;
+    }
+
+    .brand-name span {
+      color: var(--red);
+    }
+
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(22px, 4vw, 32px);
+      color: #1a1a1a;
+      margin-bottom: 6px;
+    }
+
+    .page-header p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--red-dim);
+      border: 1px solid var(--red-border);
+      color: var(--red);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--red-border);
+    }
+
+    .num-badge {
+      background: var(--red-dim);
+      border: 1px solid var(--red-border);
+      color: var(--red);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+
+    .field.mb0 {
+      margin-bottom: 0;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    label .req {
+      color: var(--error);
+      margin-left: 2px;
+    }
+
+    input,
+    select,
+    textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px;
+      padding: 10px 13px;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #c0c0c0;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.08);
+      background: #fff;
+    }
+
+    input.err,
+    select.err,
+    textarea.err {
+      border-color: var(--error);
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%236b6b6b' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 30px;
+      cursor: pointer;
+    }
+
+    select option {
+      background: #fff;
+      color: #1a1a1a;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.5;
+    }
+
+    .err-msg {
+      font-size: 11px;
+      color: var(--error);
+      display: none;
+    }
+
+    .has-err .err-msg {
+      display: block;
+    }
+
+    .has-err input,
+    .has-err select,
+    .has-err textarea {
+      border-color: var(--error);
+    }
+
+    .sub-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+      margin-top: 20px;
+    }
+
+    .row-grid-partners {
+      display: grid;
+      grid-template-columns: 28px 1fr 1fr 1fr 1fr;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .row-grid-agencies {
+      display: grid;
+      grid-template-columns: 28px 1.5fr 1fr 1fr 1.2fr 1fr 0.8fr;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .row-num {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .col-header {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+      padding-bottom: 6px;
+    }
+
+    .trade-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .trade-col-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--red);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .trade-row {
+      display: grid;
+      grid-template-columns: 1fr 80px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .trade-label {
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .mt-row {
+      display: grid;
+      grid-template-columns: 28px 1fr 80px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .gt-table {
+      width: 100%;
+    }
+
+    .gt-header {
+      display: grid;
+      grid-template-columns: 1fr 80px 80px;
+      gap: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 6px;
+    }
+
+    .gt-header span {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .gt-header span:first-child {
+      text-align: left;
+    }
+
+    .gt-row {
+      display: grid;
+      grid-template-columns: 1fr 80px 80px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .gt-row input {
+      text-align: center;
+    }
+
+    .gt-label {
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    .submit-wrap {
+      text-align: center;
+      margin-top: 28px;
+    }
+
+    .submit-btn {
+      display: inline-block;
+      padding: 16px 56px;
+      background: var(--red);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      box-shadow: 0 4px 16px rgba(200, 16, 46, 0.25);
+    }
+
+    .submit-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .success-card {
+      display: none;
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 60px 32px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .success-icon {
+      width: 70px;
+      height: 70px;
+      background: var(--red-dim);
+      border: 1px solid var(--red-border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 20px;
+      color: var(--red);
+    }
+
+    .success-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .success-card p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--red);
+      color: #fff;
+      padding: 11px 22px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media(max-width: 600px) {
+      .card {
+        padding: 20px 16px;
+      }
+
+      .grid-2,
+      .grid-3,
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+
+      .trade-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .row-grid-partners {
+        grid-template-columns: 20px 1fr 1fr;
+      }
+
+      .row-grid-agencies {
+        grid-template-columns: 20px 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+
+    <div class="page-header">
+      <div class="brand">
+        <div class="brand-icon">R</div>
+        <div class="brand-name">RECON <span>OIL INDUSTRIES</span></div>
+      </div>
+      <div class="badge">KYC 2026</div>
+      <h1>Stockist Know Your Customer</h1>
+      <p>Please fill in all required details accurately. This will be submitted directly to our records.</p>
+    </div>
+
+    <form id="kycForm" novalidate>
+
+      <!-- 1. Location Details -->
+      <div class="card">
+        <div class="card-title">
+          <div class="num-badge">1</div> Location Details
+        </div>
+        <div class="grid-3">
+          <div class="field" id="f-branch">
+            <label>Branch <span class="req">*</span></label>
+            <input type="text" id="branch" placeholder="Branch name" />
+            <span class="err-msg">Required</span>
+          </div>
+          <div class="field" id="f-state">
+            <label>State <span class="req">*</span></label>
+            <input type="text" id="state" placeholder="State" />
+            <span class="err-msg">Required</span>
+          </div>
+          <div class="field" id="f-town">
+            <label>Town / Area <span class="req">*</span></label>
+            <input type="text" id="town" placeholder="Town or area" />
+            <span class="err-msg">Required</span>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Depot</label>
+            <input type="text" id="depot" placeholder="Depot name" />
+          </div>
+          <div class="field">
+            <label>Population</label>
+            <input type="text" id="population" placeholder="Approx. population" />
+          </div>
+          <div class="field">
+            <label>SS</label>
+            <input type="text" id="ss" placeholder="SS code" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Trade Outlets -->
+      <div class="card">
+        <div class="card-title">
+          <div class="num-badge">2</div> Trade Outlets
+        </div>
+        <div class="trade-wrap">
+
+          <div>
+            <div class="trade-col-title">General Trade</div>
+            <div class="gt-table">
+              <div class="gt-header">
+                <span>Outlet Type</span>
+                <span>Nos</span>
+                <span>Service</span>
+              </div>
+              <div class="gt-row">
+                <span class="gt-label">Total Outlet</span>
+                <input type="number" id="gt_total_nos" placeholder="0" min="0" />
+                <input type="number" id="gt_total_svc" placeholder="0" min="0" />
+              </div>
+              <div class="gt-row">
+                <span class="gt-label">Whole Sale</span>
+                <input type="number" id="gt_ws_nos" placeholder="0" min="0" />
+                <input type="number" id="gt_ws_svc" placeholder="0" min="0" />
+              </div>
+              <div class="gt-row">
+                <span class="gt-label">Mini Modern Trade</span>
+                <input type="number" id="gt_mmt_nos" placeholder="0" min="0" />
+                <input type="number" id="gt_mmt_svc" placeholder="0" min="0" />
+              </div>
+              <div class="gt-row">
+                <span class="gt-label">Kirana / Grocery</span>
+                <input type="number" id="gt_kirana_nos" placeholder="0" min="0" />
+                <input type="number" id="gt_kirana_svc" placeholder="0" min="0" />
+              </div>
+              <div class="gt-row">
+                <span class="gt-label">Provision</span>
+                <input type="number" id="gt_prov_nos" placeholder="0" min="0" />
+                <input type="number" id="gt_prov_svc" placeholder="0" min="0" />
+              </div>
+              <div class="gt-row">
+                <span class="gt-label">Medical</span>
+                <input type="number" id="gt_med_nos" placeholder="0" min="0" />
+                <input type="number" id="gt_med_svc" placeholder="0" min="0" />
+              </div>
+              <div class="gt-row">
+                <span class="gt-label">Cosmetic</span>
+                <input type="number" id="gt_cos_nos" placeholder="0" min="0" />
+                <input type="number" id="gt_cos_svc" placeholder="0" min="0" />
+              </div>
+              <div class="gt-row">
+                <span class="gt-label">Pooja Items</span>
+                <input type="number" id="gt_pooja_nos" placeholder="0" min="0" />
+                <input type="number" id="gt_pooja_svc" placeholder="0" min="0" />
+              </div>
+              <div class="gt-row">
+                <span class="gt-label">Others</span>
+                <input type="number" id="gt_others_nos" placeholder="0" min="0" />
+                <input type="number" id="gt_others_svc" placeholder="0" min="0" />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="trade-col-title">Modern Trade</div>
+            <div class="mt-row">
+              <span class="row-num">1</span>
+              <span class="trade-label">D'Mart</span>
+              <input type="number" id="mt_dmart" placeholder="Nos" min="0" />
+            </div>
+            <div class="mt-row">
+              <span class="row-num">2</span>
+              <span class="trade-label">Reliance</span>
+              <input type="number" id="mt_reliance" placeholder="Nos" min="0" />
+            </div>
+            <div class="mt-row">
+              <span class="row-num">3</span>
+              <input type="text" id="mt3_name" placeholder="Store name" />
+              <input type="number" id="mt_3" placeholder="Nos" min="0" />
+            </div>
+            <div class="mt-row">
+              <span class="row-num">4</span>
+              <input type="text" id="mt4_name" placeholder="Store name" />
+              <input type="number" id="mt_4" placeholder="Nos" min="0" />
+            </div>
+            <div class="mt-row">
+              <span class="row-num">5</span>
+              <input type="text" id="mt5_name" placeholder="Store name" />
+              <input type="number" id="mt_5" placeholder="Nos" min="0" />
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 3. Stockist Info -->
+      <div class="card">
+        <div class="card-title">
+          <div class="num-badge">3</div> Stockist / Sub-Stockist Details
+        </div>
+        <div class="grid-3">
+          <div class="field" id="f-ssType">
+            <label>Type <span class="req">*</span></label>
+            <select id="ssType">
+              <option value="" disabled selected>Select type</option>
+              <option>Super Stockist</option>
+              <option>Stockist</option>
+              <option>Sub-Stockist</option>
+            </select>
+            <span class="err-msg">Required</span>
+          </div>
+          <div class="field" id="f-stockistName">
+            <label>Stockist's Name <span class="req">*</span></label>
+            <input type="text" id="stockistName" placeholder="Full name" />
+            <span class="err-msg">Required</span>
+          </div>
+          <div class="field">
+            <label>Business Type</label>
+            <select id="businessType">
+              <option value="" disabled selected>Select</option>
+              <option>Proprietor</option>
+              <option>Partnership</option>
+              <option>LLP</option>
+              <option>Pvt. Ltd.</option>
+              <option>Ltd.</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Address</label>
+          <textarea id="address" placeholder="Full business address..."></textarea>
+        </div>
+      </div>
+
+      <!-- 4. Legal & Compliance -->
+      <div class="card">
+        <div class="card-title">
+          <div class="num-badge">4</div> Legal & Compliance
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Invoice Type</label>
+            <select id="invoiceType">
+              <option value="" disabled selected>Select</option>
+              <option>Manual</option>
+              <option>Computerised</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Software</label>
+            <select id="software">
+              <option value="" disabled selected>Select</option>
+              <option>Tally</option>
+              <option>ERP</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field" id="f-gstn">
+            <label>GSTN <span class="req">*</span></label>
+            <input type="text" id="gstn" placeholder="15-digit GSTIN" maxlength="15" />
+            <span class="err-msg">Required</span>
+          </div>
+          <div class="field">
+            <label>GSTN Date</label>
+            <input type="date" id="gstnDate" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>FSSAI Number</label>
+            <input type="text" id="fssai" placeholder="FSSAI licence number" />
+          </div>
+          <div class="field">
+            <label>FSSAI Validity Date</label>
+            <input type="date" id="fssaiValidity" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Partners / Directors -->
+      <div class="card">
+        <div class="card-title">
+          <div class="num-badge">5</div> Partners / Proprietor / Directors
+        </div>
+
+        <!-- Column headers -->
+        <div class="row-grid-partners">
+          <span></span>
+          <span class="col-header">Name</span>
+          <span class="col-header">Contact No</span>
+          <span class="col-header">Email ID</span>
+          <span class="col-header">PAN No</span>
+        </div>
+
+        <div id="partnersRows">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+
+      <!-- 6. Agencies -->
+      <div class="card">
+        <div class="card-title">
+          <div class="num-badge">6</div> Current Agencies / Brands
+        </div>
+
+        <div class="row-grid-agencies">
+          <span></span>
+          <span class="col-header">Company Name</span>
+          <span class="col-header">Head Office</span>
+          <span class="col-header">Depot</span>
+          <span class="col-header">Brands</span>
+          <span class="col-header">Sales Booking</span>
+          <span class="col-header">App Name</span>
+        </div>
+
+        <div id="agencyRows">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+
+      <!-- 7. Sign-off -->
+      <div class="card">
+        <div class="card-title">
+          <div class="num-badge">7</div> Sign-off Details
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Sales Officer Name</label>
+            <input type="text" id="salesOfficerName" placeholder="Sales officer full name" />
+          </div>
+          <div class="field">
+            <label>ASE / ASM / RSM Name</label>
+            <input type="text" id="asmName" placeholder="ASE / ASM / RSM name" />
+          </div>
+        </div>
+      </div>
+
+      <div class="submit-wrap">
+        <button type="submit" class="submit-btn" id="submitBtn">Submit KYC Form</button>
+      </div>
+
+    </form>
+
+    <!-- Success -->
+    <div class="success-card" id="successCard">
+      <div class="success-icon">✓</div>
+      <h2>KYC Submitted Successfully!</h2>
+      <p>The KYC details have been recorded.<br>Our team will review and get in touch if anything is needed.</p>
+    </div>
+
+    <div class="footer">© 2026 Recon Oil Industries · Mumbai</div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ─── PASTE YOUR APPS SCRIPT WEB APP URL HERE ───
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdBD2Xrgimb9WJOvePRCDauXeJwDsoe7oiVhR6eApkM03F3C8yLtKcMh3X-WVHsVv3/exec";
+    // ────────────────────────────────────────────────
+
+    // Build partner rows
+    const partnersWrap = document.getElementById("partnersRows");
+    for (let i = 1; i <= 5; i++) {
+      const row = document.createElement("div");
+      row.className = "row-grid-partners";
+      row.innerHTML = `
+      <span class="row-num">${i}</span>
+      <input type="text" id="p${i}name" placeholder="Full name"/>
+      <input type="text" id="p${i}contact" placeholder="+91"/>
+      <input type="email" id="p${i}email" placeholder="email@domain.com"/>
+      <input type="text" id="p${i}pan" placeholder="ABCDE1234F" maxlength="10"/>
+    `;
+      partnersWrap.appendChild(row);
+    }
+
+    // Build agency rows
+    const agencyWrap = document.getElementById("agencyRows");
+    for (let i = 1; i <= 5; i++) {
+      const row = document.createElement("div");
+      row.className = "row-grid-agencies";
+      row.innerHTML = `
+      <span class="row-num">${i}</span>
+      <input type="text" id="a${i}company" placeholder="Company"/>
+      <input type="text" id="a${i}ho" placeholder="City"/>
+      <input type="text" id="a${i}depot" placeholder="Depot"/>
+      <input type="text" id="a${i}brands" placeholder="Brand names"/>
+      <select id="a${i}booking">
+        <option value="">—</option>
+        <option>Manual</option>
+        <option>App</option>
+      </select>
+      <input type="text" id="a${i}app" placeholder="App name"/>
+    `;
+      agencyWrap.appendChild(row);
+    }
+
+    // Toast
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 3500);
+    }
+
+    // Validate required fields
+    function validate() {
+      const required = [
+        { id: "branch", wrap: "f-branch" },
+        { id: "state", wrap: "f-state" },
+        { id: "town", wrap: "f-town" },
+        { id: "ssType", wrap: "f-ssType" },
+        { id: "stockistName", wrap: "f-stockistName" },
+        { id: "gstn", wrap: "f-gstn" },
+      ];
+      let ok = true;
+      required.forEach(({ id, wrap }) => {
+        const el = document.getElementById(id);
+        const wr = document.getElementById(wrap);
+        if (!el.value.trim()) {
+          wr.classList.add("has-err"); ok = false;
+        } else {
+          wr.classList.remove("has-err");
+        }
+      });
+      return ok;
+    }
+
+    function g(id) { return (document.getElementById(id)?.value || "").trim(); }
+
+    document.getElementById("kycForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!validate()) { showToast("Please fill all required fields."); return; }
+
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true; btn.textContent = "Submitting…";
+
+      const payload = {
+        branch: g("branch"), state: g("state"), town: g("town"),
+        depot: g("depot"), population: g("population"), ss: g("ss"),
+        gt_total_nos: g("gt_total_nos"), gt_total_svc: g("gt_total_svc"),
+        gt_ws_nos: g("gt_ws_nos"), gt_ws_svc: g("gt_ws_svc"),
+        gt_mmt_nos: g("gt_mmt_nos"), gt_mmt_svc: g("gt_mmt_svc"),
+        gt_kirana_nos: g("gt_kirana_nos"), gt_kirana_svc: g("gt_kirana_svc"),
+        gt_prov_nos: g("gt_prov_nos"), gt_prov_svc: g("gt_prov_svc"),
+        gt_med_nos: g("gt_med_nos"), gt_med_svc: g("gt_med_svc"),
+        gt_cos_nos: g("gt_cos_nos"), gt_cos_svc: g("gt_cos_svc"),
+        gt_pooja_nos: g("gt_pooja_nos"), gt_pooja_svc: g("gt_pooja_svc"),
+        gt_others_nos: g("gt_others_nos"), gt_others_svc: g("gt_others_svc"),
+        mt_dmart: g("mt_dmart"), mt_reliance: g("mt_reliance"),
+        mt_3: g("mt3_name") + " - " + g("mt_3"),
+        mt_4: g("mt4_name") + " - " + g("mt_4"),
+        mt_5: g("mt5_name") + " - " + g("mt_5"),
+        ssType: g("ssType"), stockistName: g("stockistName"),
+        address: g("address"), businessType: g("businessType"),
+        invoiceType: g("invoiceType"), software: g("software"),
+        gstn: g("gstn"), gstnDate: g("gstnDate"),
+        fssai: g("fssai"), fssaiValidity: g("fssaiValidity"),
+        p1name: g("p1name"), p1contact: g("p1contact"), p1email: g("p1email"), p1pan: g("p1pan"),
+        p2name: g("p2name"), p2contact: g("p2contact"), p2email: g("p2email"), p2pan: g("p2pan"),
+        p3name: g("p3name"), p3contact: g("p3contact"), p3email: g("p3email"), p3pan: g("p3pan"),
+        p4name: g("p4name"), p4contact: g("p4contact"), p4email: g("p4email"), p4pan: g("p4pan"),
+        p5name: g("p5name"), p5contact: g("p5contact"), p5email: g("p5email"), p5pan: g("p5pan"),
+        a1company: g("a1company"), a1ho: g("a1ho"), a1depot: g("a1depot"), a1brands: g("a1brands"), a1booking: g("a1booking"), a1app: g("a1app"),
+        a2company: g("a2company"), a2ho: g("a2ho"), a2depot: g("a2depot"), a2brands: g("a2brands"), a2booking: g("a2booking"), a2app: g("a2app"),
+        a3company: g("a3company"), a3ho: g("a3ho"), a3depot: g("a3depot"), a3brands: g("a3brands"), a3booking: g("a3booking"), a3app: g("a3app"),
+        a4company: g("a4company"), a4ho: g("a4ho"), a4depot: g("a4depot"), a4brands: g("a4brands"), a4booking: g("a4booking"), a4app: g("a4app"),
+        a5company: g("a5company"), a5ho: g("a5ho"), a5depot: g("a5depot"), a5brands: g("a5brands"), a5booking: g("a5booking"), a5app: g("a5app"),
+        salesOfficerName: g("salesOfficerName"), asmName: g("asmName"),
+      };
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST", mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        document.getElementById("kycForm").style.display = "none";
+        document.getElementById("successCard").style.display = "block";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (err) {
+        showToast("Submission failed. Please try again.");
+        btn.disabled = false; btn.textContent = "Submit KYC Form";
+      }
+    });
+  </script>
+</body>
+
+</html>
