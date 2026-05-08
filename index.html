@@ -251,11 +251,6 @@
               <span>Service</span>
             </div>
             <div class="gt-row">
-              <span class="gt-label" style="font-weight:600;color:var(--red);">Total Outlet</span>
-              <input type="number" id="gt_total_nos" placeholder="0" readonly style="background:#f0f0f0;font-weight:600;color:var(--red);"/>
-              <input type="number" id="gt_total_svc" placeholder="0" readonly style="background:#f0f0f0;font-weight:600;color:var(--red);"/>
-            </div>
-            <div class="gt-row">
               <span class="gt-label">Whole Sale</span>
               <input type="number" id="gt_ws_nos" placeholder="0" min="0"/>
               <input type="number" id="gt_ws_svc" placeholder="0" min="0"/>
@@ -294,6 +289,11 @@
               <span class="gt-label">Others</span>
               <input type="number" id="gt_others_nos" placeholder="0" min="0"/>
               <input type="number" id="gt_others_svc" placeholder="0" min="0"/>
+            </div>
+            <div class="gt-row" style="border-top:1px solid var(--border);margin-top:6px;padding-top:8px;">
+              <span class="gt-label" style="font-weight:600;color:var(--red);">Total Outlet</span>
+              <input type="number" id="gt_total_nos" placeholder="0" readonly style="background:#f0f0f0;font-weight:600;color:var(--red);"/>
+              <input type="number" id="gt_total_svc" placeholder="0" readonly style="background:#f0f0f0;font-weight:600;color:var(--red);"/>
             </div>
           </div>
         </div>
@@ -563,6 +563,18 @@
     });
   }
 
+  // Email — valid format check on blur (optional field)
+  function enforceEmail(el) {
+    el.addEventListener("blur", () => {
+      const val = el.value.trim();
+      if (!val) { el.style.borderColor = ""; el.title = ""; return; }
+      const valid = /^[^\s@]+@[^\s@]+\.(com|in|co\.in|net|org|edu)$/i.test(val);
+      el.style.borderColor = valid ? "" : "var(--error)";
+      el.title = valid ? "" : "Enter a valid email (must contain @ and end with .com / .in)";
+    });
+    el.addEventListener("focus", () => { el.style.borderColor = ""; });
+  }
+
   // PAN: 5 letters + 4 digits + 1 letter, all caps
   function enforcePAN(el) {
     el.style.textTransform = "uppercase";
@@ -594,6 +606,7 @@
     partnersWrap.appendChild(row);
     enforcePhone(document.getElementById(`p${i}contact`));
     enforcePAN(document.getElementById(`p${i}pan`));
+    enforceEmail(document.getElementById(`p${i}email`));
   }
 
   // ── Build agency rows ───────────────────────────
@@ -640,6 +653,7 @@
   });
 
   // ── Enforce formats on fixed fields ────────────
+  enforceEmail(document.getElementById("cpEmail"));
   enforcePhone(document.getElementById("cpPhone"));
   enforceAlphanumUpper(document.getElementById("gstn"), 15);
   enforceAlphanumUpper(document.getElementById("fssai"), 14);
@@ -729,6 +743,22 @@
         pan.style.borderColor = "";
       }
     }
+
+    // Email — validate if filled (cpEmail + partner emails)
+    const emailIds = ["cpEmail", "p1email", "p2email", "p3email", "p4email", "p5email"];
+    emailIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const val = el.value.trim();
+      if (val && !/^[^\s@]+@[^\s@]+\.(com|in|co\.in|net|org|edu)$/i.test(val)) {
+        el.style.borderColor = "var(--error)";
+        el.title = "Enter a valid email (must contain @ and end with .com / .in)";
+        ok = false; firstErrId = firstErrId || id;
+      } else {
+        el.style.borderColor = "";
+        el.title = "";
+      }
+    });
 
     // Scroll to first error
     if (firstErrId) {
