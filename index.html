@@ -519,7 +519,67 @@
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdBD2Xrgimb9WJOvePRCDauXeJwDsoe7oiVhR6eApkM03F3C8yLtKcMh3X-WVHsVv3/exec";
   // ────────────────────────────────────────────────
 
-  // Build partner rows
+  // ── Real-time input sanitizers ──────────────────
+
+  // Block non-digits, enforce max 10
+  function enforcePhone(el) {
+    el.addEventListener("input", () => {
+      el.value = el.value.replace(/\D/g, "").slice(0, 10);
+    });
+    el.addEventListener("keypress", (e) => {
+      if (!/[0-9]/.test(e.key)) e.preventDefault();
+    });
+    el.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const paste = (e.clipboardData || window.clipboardData).getData("text");
+      el.value = paste.replace(/\D/g, "").slice(0, 10);
+    });
+  }
+
+  // Block non-digits only (for GT/MT number fields)
+  function enforceDigitsOnly(el) {
+    el.addEventListener("keypress", (e) => {
+      if (!/[0-9]/.test(e.key)) e.preventDefault();
+    });
+    el.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const paste = (e.clipboardData || window.clipboardData).getData("text");
+      el.value = paste.replace(/\D/g, "");
+    });
+  }
+
+  // Auto-uppercase + allow only alphanumeric
+  function enforceAlphanumUpper(el, maxLen) {
+    el.addEventListener("input", () => {
+      el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, maxLen);
+    });
+    el.addEventListener("keypress", (e) => {
+      if (!/[A-Za-z0-9]/.test(e.key)) e.preventDefault();
+    });
+    el.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const paste = (e.clipboardData || window.clipboardData).getData("text");
+      el.value = paste.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, maxLen);
+    });
+  }
+
+  // PAN: 5 letters + 4 digits + 1 letter, all caps
+  function enforcePAN(el) {
+    el.style.textTransform = "uppercase";
+    el.addEventListener("input", () => {
+      el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10);
+    });
+    el.addEventListener("keypress", (e) => {
+      if (!/[A-Za-z0-9]/.test(e.key)) e.preventDefault();
+    });
+    el.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const paste = (e.clipboardData || window.clipboardData).getData("text");
+      el.value = paste.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10);
+    });
+  }
+
+  // ── Build partner rows ──────────────────────────
   const partnersWrap = document.getElementById("partnersRows");
   for (let i = 1; i <= 5; i++) {
     const row = document.createElement("div");
@@ -527,14 +587,16 @@
     row.innerHTML = `
       <span class="row-num">${i}</span>
       <input type="text" id="p${i}name" placeholder="Full name"/>
-      <input type="text" id="p${i}contact" placeholder="+91"/>
+      <input type="text" id="p${i}contact" placeholder="10-digit mobile" maxlength="10" inputmode="numeric"/>
       <input type="email" id="p${i}email" placeholder="email@domain.com"/>
-      <input type="text" id="p${i}pan" placeholder="ABCDE1234F" maxlength="10"/>
+      <input type="text" id="p${i}pan" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase"/>
     `;
     partnersWrap.appendChild(row);
+    enforcePhone(document.getElementById(`p${i}contact`));
+    enforcePAN(document.getElementById(`p${i}pan`));
   }
 
-  // Build agency rows
+  // ── Build agency rows ───────────────────────────
   const agencyWrap = document.getElementById("agencyRows");
   for (let i = 1; i <= 8; i++) {
     const row = document.createElement("div");
@@ -563,7 +625,26 @@
     agencyWrap.appendChild(row);
   }
 
-  // Toast
+  // ── Enforce digit-only on all GT / MT number inputs ──
+  const numericIds = [
+    "gt_ws_nos","gt_ws_svc","gt_mmt_nos","gt_mmt_svc",
+    "gt_kirana_nos","gt_kirana_svc","gt_prov_nos","gt_prov_svc",
+    "gt_med_nos","gt_med_svc","gt_cos_nos","gt_cos_svc",
+    "gt_pooja_nos","gt_pooja_svc","gt_others_nos","gt_others_svc",
+    "mt_dmart","mt_reliance","mt_3","mt_4","mt_5","mt_6","mt_7","mt_8",
+    "population"
+  ];
+  numericIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) enforceDigitsOnly(el);
+  });
+
+  // ── Enforce formats on fixed fields ────────────
+  enforcePhone(document.getElementById("cpPhone"));
+  enforceAlphanumUpper(document.getElementById("gstn"), 15);
+  enforceAlphanumUpper(document.getElementById("fssai"), 14);
+
+  // ── Toast ───────────────────────────────────────
   function showToast(msg) {
     const t = document.getElementById("toast");
     t.textContent = msg;
@@ -571,7 +652,7 @@
     setTimeout(() => t.classList.remove("show"), 3500);
   }
 
-  // Auto-calculate Total Outlet (sum of all GT rows)
+  // ── Auto-calculate Total Outlet ─────────────────
   const gtNosIds = ["gt_ws_nos","gt_mmt_nos","gt_kirana_nos","gt_prov_nos","gt_med_nos","gt_cos_nos","gt_pooja_nos","gt_others_nos"];
   const gtSvcIds = ["gt_ws_svc","gt_mmt_svc","gt_kirana_svc","gt_prov_svc","gt_med_svc","gt_cos_svc","gt_pooja_svc","gt_others_svc"];
   function recalcTotals() {
@@ -584,43 +665,74 @@
     document.getElementById(id)?.addEventListener("input", recalcTotals);
   });
 
-  // Validate required fields
+  // ── Validation helpers ──────────────────────────
+  function setErr(wrapId, msg, isErr) {
+    const wr = document.getElementById(wrapId);
+    if (!wr) return;
+    const errEl = wr.querySelector(".err-msg");
+    if (isErr) {
+      wr.classList.add("has-err");
+      if (errEl && msg) errEl.textContent = msg;
+    } else {
+      wr.classList.remove("has-err");
+    }
+  }
+
   function validate() {
-    const required = [
-      { id: "branch", wrap: "f-branch" },
-      { id: "state", wrap: "f-state" },
-      { id: "town", wrap: "f-town" },
-      { id: "ssType", wrap: "f-ssType" },
-      { id: "stockistName", wrap: "f-stockistName" },
-      { id: "cpName", wrap: "f-cpName" },
-    ];
     let ok = true;
-    required.forEach(({ id, wrap }) => {
-      const el = document.getElementById(id);
-      const wr = document.getElementById(wrap);
-      if (!el.value.trim()) {
-        wr.classList.add("has-err"); ok = false;
-      } else {
-        wr.classList.remove("has-err");
-      }
+    let firstErrId = null;
+
+    // Required text fields
+    const required = [
+      { id: "branch",       wrap: "f-branch",       msg: "Branch is required" },
+      { id: "state",        wrap: "f-state",         msg: "State is required" },
+      { id: "town",         wrap: "f-town",          msg: "Town / Area is required" },
+      { id: "ssType",       wrap: "f-ssType",        msg: "Type is required" },
+      { id: "stockistName", wrap: "f-stockistName",  msg: "Stockist name is required" },
+      { id: "cpName",       wrap: "f-cpName",        msg: "Contact person name is required" },
+    ];
+    required.forEach(({ id, wrap, msg }) => {
+      const val = document.getElementById(id)?.value.trim();
+      const err = !val;
+      setErr(wrap, msg, err);
+      if (err) { ok = false; firstErrId = firstErrId || id; }
     });
 
-    // Phone - 10 digits
-    const phone = document.getElementById("cpPhone");
-    const phoneWrap = document.getElementById("f-cpPhone");
-    if (!/^[0-9]{10}$/.test(phone.value.trim())) {
-      phoneWrap.classList.add("has-err"); ok = false;
-    } else {
-      phoneWrap.classList.remove("has-err");
+    // Phone — exactly 10 digits
+    const phoneVal = document.getElementById("cpPhone")?.value.trim();
+    const phoneErr = !/^[0-9]{10}$/.test(phoneVal);
+    setErr("f-cpPhone", "Enter a valid 10-digit mobile number", phoneErr);
+    if (phoneErr) { ok = false; firstErrId = firstErrId || "cpPhone"; }
+
+    // GSTN — exactly 15 alphanumeric
+    const gstnVal = document.getElementById("gstn")?.value.trim().toUpperCase();
+    const gstnErr = !/^[A-Z0-9]{15}$/.test(gstnVal);
+    setErr("f-gstn", "GSTIN must be exactly 15 alphanumeric characters", gstnErr);
+    if (gstnErr) { ok = false; firstErrId = firstErrId || "gstn"; }
+
+    // Partner phones — 10 digits if filled
+    for (let i = 1; i <= 5; i++) {
+      const el = document.getElementById(`p${i}contact`);
+      if (el && el.value.trim() && !/^[0-9]{10}$/.test(el.value.trim())) {
+        el.style.borderColor = "var(--error)";
+        ok = false; firstErrId = firstErrId || `p${i}contact`;
+      } else if (el) {
+        el.style.borderColor = "";
+      }
+
+      // PAN — 10 chars, format AAAAA9999A if filled
+      const pan = document.getElementById(`p${i}pan`);
+      if (pan && pan.value.trim() && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan.value.trim().toUpperCase())) {
+        pan.style.borderColor = "var(--error)";
+        ok = false; firstErrId = firstErrId || `p${i}pan`;
+      } else if (pan) {
+        pan.style.borderColor = "";
+      }
     }
 
-    // GST - 15 alphanumeric
-    const gstn = document.getElementById("gstn");
-    const gstnWrap = document.getElementById("f-gstn");
-    if (!/^[A-Z0-9]{15}$/.test(gstn.value.trim().toUpperCase())) {
-      gstnWrap.classList.add("has-err"); ok = false;
-    } else {
-      gstnWrap.classList.remove("has-err");
+    // Scroll to first error
+    if (firstErrId) {
+      document.getElementById(firstErrId)?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
     return ok;
